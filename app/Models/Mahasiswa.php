@@ -12,7 +12,6 @@ class Mahasiswa
     private int $prodiId;
     private int $angkatan;
 
-    // Properti tambahan hanya untuk keperluan tampilan (hasil JOIN ke tabel prodi)
     private ?string $prodiNama = null;
 
     public function __construct(
@@ -52,8 +51,6 @@ class Mahasiswa
 
         $this->nim = $nim;
 
-        // Angkatan otomatis dihitung dari 2 digit pertama NIM,
-        // supaya selalu konsisten dan tidak bisa diisi manual sembarangan.
         $this->angkatan = (int) ('20' . substr($nim, 0, 2));
     }
 

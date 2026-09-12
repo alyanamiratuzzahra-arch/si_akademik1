@@ -1,10 +1,5 @@
 <?php
 
-/**
- * Menghasilkan URL yang benar secara otomatis, tidak peduli folder project
- * ditaruh di mana (htdocs/akademik1, htdocs/akademik1/public sebagai root, dll).
- * Ini menghilangkan bug "kadang 404" akibat path yang di-hardcode.
- */
 if (!function_exists('base_url')) {
     function base_url(string $path = ''): string
     {
@@ -36,9 +31,7 @@ if (!function_exists('e')) {
 }
 
 if (!function_exists('flash')) {
-    /**
-     * Ambil dan hapus flash message dari session (tampil sekali lalu hilang).
-     */
+
     function flash(): ?array
     {
         if (!empty($_SESSION['flash'])) {

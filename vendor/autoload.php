@@ -1,7 +1,6 @@
 <?php
 
 spl_autoload_register(function ($class) {
-    // Prefix namespace project
     $prefix = 'App\\';
     $base_dir = __DIR__ . '/../app/';
 

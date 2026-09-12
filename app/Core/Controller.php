@@ -8,7 +8,6 @@ class Controller
     {
         extract($data);
 
-        // Jika halaman login, jangan tampilkan navbar dan footer
         if (strpos($view, 'auth/') === 0) {
             if (file_exists(__DIR__ . '/../Views/' . $view . '.php')) {
                 require_once __DIR__ . '/../Views/' . $view . '.php';
@@ -16,7 +15,6 @@ class Controller
             return;
         }
 
-        // Untuk halaman lain (mahasiswa, dll), tampilkan partials lengkap
         if (file_exists(__DIR__ . '/../Views/partials/header.php')) {
             require_once __DIR__ . '/../Views/partials/header.php';
         }

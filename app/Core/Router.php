@@ -20,8 +20,6 @@ class Router
         $uri = $uri ?? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $method = $method ?? $_SERVER['REQUEST_METHOD'];
 
-        // Hapus base folder (misal /akademik1/public) dari URI secara otomatis,
-        // supaya project ini tetap jalan di folder apa saja.
         $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
         $baseDir = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
 
@@ -29,7 +27,6 @@ class Router
             $uri = substr($uri, strlen($baseDir));
         }
 
-        // Normalisasi URI menjadi format standar seperti /login atau /mahasiswa
         $uri = '/' . trim($uri, '/');
         if ($uri === '/index.php' || $uri === '') {
             $uri = '/';

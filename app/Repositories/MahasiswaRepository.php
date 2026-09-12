@@ -91,9 +91,6 @@ class MahasiswaRepository extends Model
         return $stmt->execute(['nim' => $nim]);
     }
 
-    /**
-     * Ubah 1 baris hasil query (array) menjadi object Mahasiswa.
-     */
     private function mapToModel(array $row): Mahasiswa
     {
         $mahasiswa = new Mahasiswa(
