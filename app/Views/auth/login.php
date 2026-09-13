@@ -28,6 +28,23 @@
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" name="password" id="password" class="form-control" required placeholder="Masukkan password">
+                                <div class="form-chek mt-2">
+                                    <input class="form-check-input" type="checkbox" id="showPassword">
+                                    <label class="form-check-label" for="showPassword">Tampilkan Password</label>
+                                </div>
+
+                                <script>
+                                    document.getElementById("showPassword").addEventListener("change", function() {
+                                        const password =
+                                    document.getElementById("password");
+
+                                        if(this.checked) {
+                                            password.type = "text";
+                                        } else {
+                                            password.type = "password";
+                                        }
+                                    })
+                                </script>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Login</button>
                         </form>
