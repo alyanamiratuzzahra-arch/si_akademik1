@@ -3,104 +3,170 @@
 namespace App\Repositories;
 
 use App\Core\Model;
-use App\Models\Mahasiswa;
+use PDO;
 
 class MahasiswaRepository extends Model
 {
-    /**
-     * @return Mahasiswa[]
-     */
-    public function getAll(?string $keyword = null): array
+    // =========================
+    // READ ALL
+    // =========================
+    public function getAll(?string $search = null): array
     {
-        if ($keyword) {
-            $stmt = $this->db->prepare("
-                SELECT m.*, p.nama AS prodi_nama 
-                FROM mahasiswa m 
-                JOIN prodi p ON m.prodi_id = p.id 
-                WHERE m.nim LIKE :keyword1 OR m.nama LIKE :keyword2
-                ORDER BY m.nim ASC
-            ");
-            $stmt->execute([
-                'keyword1' => '%' . $keyword . '%',
-                'keyword2' => '%' . $keyword . '%',
-            ]);
-        } else {
-            $stmt = $this->db->prepare("
-                SELECT m.*, p.nama AS prodi_nama 
-                FROM mahasiswa m 
-                JOIN prodi p ON m.prodi_id = p.id 
-                ORDER BY m.nim ASC
-            ");
-            $stmt->execute();
+        $sql = "
+            SELECT 
+                mahasiswa.nim,
+                mahasiswa.nama,
+                mahasiswa.email,
+                mahasiswa.prodi_id,
+                prodi.nama AS prodi_nama,
+                CONCAT('20', SUBSTRING(mahasiswa.nim, 1, 2)) AS angkatan
+            FROM mahasiswa
+            LEFT JOIN prodi ON mahasiswa.prodi_id = prodi.id
+        ";
+
+        $params = [];
+
+        if ($search) {
+            $sql .= "
+                WHERE mahasiswa.nim LIKE :search
+                   OR mahasiswa.nama LIKE :search
+                   OR mahasiswa.email LIKE :search
+            ";
+
+            $params['search'] = '%' . $search . '%';
         }
 
-        return array_map([$this, 'mapToModel'], $stmt->fetchAll());
+        $sql .= " ORDER BY mahasiswa.nim ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function findByNim(string $nim): ?Mahasiswa
-    {
-        $stmt = $this->db->prepare("
-            SELECT m.*, p.nama AS prodi_nama 
-            FROM mahasiswa m 
-            JOIN prodi p ON m.prodi_id = p.id 
-            WHERE m.nim = :nim
-        ");
-        $stmt->execute(['nim' => $nim]);
-        $row = $stmt->fetch();
 
-        return $row ? $this->mapToModel($row) : null;
+    // =========================
+    // FIND BY NIM
+    // =========================
+    public function findByNim(string $nim): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT 
+                mahasiswa.nim,
+                mahasiswa.nama,
+                mahasiswa.email,
+                mahasiswa.prodi_id,
+                prodi.nama AS prodi_nama,
+                CONCAT('20', SUBSTRING(mahasiswa.nim, 1, 2)) AS angkatan
+             FROM mahasiswa
+             LEFT JOIN prodi ON mahasiswa.prodi_id = prodi.id
+             WHERE mahasiswa.nim = :nim"
+        );
+
+        $stmt->execute([
+            'nim' => $nim
+        ]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: null;
     }
 
-    public function create(Mahasiswa $mahasiswa): bool
+
+    // =========================
+    // CREATE
+    // =========================
+    public function create(array $data): bool
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO mahasiswa (nim, nama, email, prodi_id, angkatan) 
-            VALUES (:nim, :nama, :email, :prodi_id, :angkatan)
-        ");
+        $stmt = $this->db->prepare(
+            "INSERT INTO mahasiswa
+            (nim, nama, email, prodi_id)
+            VALUES
+            (:nim, :nama, :email, :prodi_id)"
+        );
 
         return $stmt->execute([
-            'nim' => $mahasiswa->getNim(),
-            'nama' => $mahasiswa->getNama(),
-            'email' => $mahasiswa->getEmail(),
-            'prodi_id' => $mahasiswa->getProdiId(),
-            'angkatan' => $mahasiswa->getAngkatan(),
+            'nim' => $data['nim'],
+            'nama' => $data['nama'],
+            'email' => $data['email'],
+            'prodi_id' => $data['prodi_id']
         ]);
     }
 
-    public function update(string $nim, Mahasiswa $mahasiswa): bool
+
+    // =========================
+    // UPDATE
+    // =========================
+    public function update(string $nim, array $data): bool
     {
-        $stmt = $this->db->prepare("
-            UPDATE mahasiswa 
-            SET nama = :nama, email = :email, 
-            prodi_id = :prodi_id, angkatan = :angkatan 
-            WHERE nim = :nim
-        ");
+        $stmt = $this->db->prepare(
+            "UPDATE mahasiswa
+             SET nama = :nama,
+                 email = :email,
+                 prodi_id = :prodi_id
+             WHERE nim = :nim"
+        );
 
         return $stmt->execute([
-            'nama' => $mahasiswa->getNama(),
-            'email' => $mahasiswa->getEmail(),
-            'prodi_id' => $mahasiswa->getProdiId(),
-            'angkatan' => $mahasiswa->getAngkatan(),
             'nim' => $nim,
+            'nama' => $data['nama'],
+            'email' => $data['email'],
+            'prodi_id' => $data['prodi_id']
         ]);
     }
 
+
+    // =========================
+    // DELETE
+    // =========================
     public function delete(string $nim): bool
     {
-        $stmt = $this->db->prepare("DELETE FROM mahasiswa WHERE nim = :nim");
-        return $stmt->execute(['nim' => $nim]);
+        $stmt = $this->db->prepare(
+            "DELETE FROM mahasiswa
+             WHERE nim = :nim"
+        );
+
+        return $stmt->execute([
+            'nim' => $nim
+        ]);
     }
 
-    private function mapToModel(array $row): Mahasiswa
-    {
-        $mahasiswa = new Mahasiswa(
-            $row['nim'],
-            $row['nama'],
-            $row['email'],
-            (int) $row['prodi_id']
-        );
-        $mahasiswa->setProdiNama($row['prodi_nama'] ?? null);
 
-        return $mahasiswa;
+    // =========================
+    // CEK NIM
+    // =========================
+    public function existsByNim(
+        string $nim,
+        ?string $exceptNim = null
+    ): bool {
+
+        if ($exceptNim !== null) {
+
+            $stmt = $this->db->prepare(
+                "SELECT nim
+                 FROM mahasiswa
+                 WHERE nim = :nim
+                 AND nim != :except_nim"
+            );
+
+            $stmt->execute([
+                'nim' => $nim,
+                'except_nim' => $exceptNim
+            ]);
+
+        } else {
+
+            $stmt = $this->db->prepare(
+                "SELECT nim
+                 FROM mahasiswa
+                 WHERE nim = :nim"
+            );
+
+            $stmt->execute([
+                'nim' => $nim
+            ]);
+        }
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
     }
 }

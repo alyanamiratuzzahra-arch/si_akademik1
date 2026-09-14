@@ -1,5 +1,25 @@
 <?php
 
+function setFlash($type, $message)
+{
+    $_SESSION['flash'] = [
+        'type' => $type,
+        'message' => $message
+    ];
+}
+
+function flash(): ?array
+{
+    if (!empty($_SESSION['flash'])) {
+        $data = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+
+        return $data;
+    }
+
+    return null;
+}
+
 if (!function_exists('base_url')) {
     function base_url(string $path = ''): string
     {

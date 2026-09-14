@@ -1,9 +1,10 @@
 <?php
 
 return [
-    'host'     => 'localhost',
-    'dbname'   => 'si_akademik',
-    'username' => 'root',
-    'password' => '',
-    'charset'  => 'utf8mb4',
+    'host'    => '127.0.0.1',
+    'port'    => '3306',
+    'dbname'  => 'si_akademik',
+    'user'    => 'root',
+    'pass'    => '',
+    'charset' => 'utf8mb4',
 ];
