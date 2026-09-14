@@ -14,7 +14,7 @@ class ProdiController extends Controller
     public function __construct(?ProdiRepository $prodiRepo = null)
     {
         AuthMiddleware::check();
-        $this->prodiRepo = $prodiRepo ?? new ProdiRepository(Database::getInstance());
+        $this->prodiRepo = $prodiRepo ?? new ProdiRepository(Database::getConnection());
     }
 
     public function index(): void

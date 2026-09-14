@@ -14,7 +14,7 @@ class MatakuliahController extends Controller
     public function __construct()
     {
         AuthMiddleware::check();
-        $this->db = Database::getInstance();
+        $this->db = Database::getConnection();
     }
 
     public function index(): void

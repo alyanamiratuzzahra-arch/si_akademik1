@@ -45,7 +45,7 @@ class Mahasiswa
             throw new InvalidArgumentException('NIM harus berupa angka.');
         }
 
-        if (strlen($nim) < 2) {
+        if (strlen($nim) !== 8) {
             throw new InvalidArgumentException('NIM minimal 2 digit (untuk menentukan angkatan).');
         }
 
